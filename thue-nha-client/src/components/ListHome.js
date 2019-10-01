@@ -256,6 +256,18 @@ export default class ListHome extends Component {
                 ...this.getColumnSearchProps('tinhTrangNha'),
             },
             {
+                title: "Tình trạng",
+                dataIndex: "tTrang",
+                key: "tTrang",
+                render: (text, record) => (
+                    <span>
+                        {Number(text) === 0 ? "Đã xoá" : null}
+                        {Number(text) === 1 ? "Đã xác nhận" : null}
+                        {Number(text) === 2 ? "Chưa xác nhận" : null}
+                    </span>
+                ),
+            },
+            {
                 title: 'Action',
                 key: 'action',
                 render: this.renderAction,
@@ -265,7 +277,7 @@ export default class ListHome extends Component {
         return (
             <>
                 {
-                    Number(permission) !== 1 ? 
+                    Number(permission) === 2 || Number(permission) === 3 ? 
                     <Button onClick={this.openModalDangNha} type="primary">
                         <Icon type="plus"></Icon>Đăng nhà
                     </Button> : null
