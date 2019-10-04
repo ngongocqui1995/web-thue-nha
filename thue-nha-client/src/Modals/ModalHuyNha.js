@@ -26,7 +26,7 @@ export default class ModalHuyNha extends Component {
         if (result && result.message) notification.open({ message: "Thông báo", description: `${result.message}` })
         
         this.props.closeModalHuy()
-        this.props.getAll(0, 10000, 3)
+        this.props.getAll(0, 10000, this.props.tinhTrang)
     }
 
     render() {

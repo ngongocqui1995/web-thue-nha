@@ -4,7 +4,7 @@ import to from 'await-to-js'
 import { notification, Table, Input, Button, Icon } from 'antd';
 import Highlighter from 'react-highlight-words';
 import ModalXacNhanThueNha from '../Modals/ModalXacNhanThueNha';
-import ModalHuyThueNha from '../Modals/ModalXacNhanHuyThueNha';
+import ModalXacNhanHuyThueNha from '../Modals/ModalXacNhanHuyThueNha';
 import { withRouter } from 'react-router'
 
 class ThueNha extends Component {
@@ -131,7 +131,7 @@ class ThueNha extends Component {
         user = JSON.parse(user)
 
         this.setState({isModalHuy: true})
-        if (user && user.username) this.ModalHuyRef.setData(data.idNha, data.tKhoanNguoiThue)
+        if (user && user.username) this.ModalHuyRef.setData(data.idNha, data.diaChi, data.tKhoanNguoiThue)
     }
 
     closeModalHuy = () => {
@@ -204,7 +204,7 @@ class ThueNha extends Component {
                     isModalXacNhan={isModalXacNhan}
                     getAll={this.layDanhSachThueNha}
                 />
-                <ModalHuyThueNha 
+                <ModalXacNhanHuyThueNha 
                     ref={this.onRefModalHuy}
                     closeModalHuy={this.closeModalHuy}
                     isModalHuy={isModalHuy}

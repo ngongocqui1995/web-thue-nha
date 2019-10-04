@@ -50,6 +50,7 @@ class SiderWeb extends Component {
         localStorage.clear()
         this.setState({username: "User", permission: ""})
         this.props.history.push("/")
+        window.location.reload();
     }
 
     render() {

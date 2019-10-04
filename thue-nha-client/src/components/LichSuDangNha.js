@@ -4,6 +4,7 @@ import to from 'await-to-js'
 import { notification, Table, Input, Button, Icon } from 'antd';
 import Highlighter from 'react-highlight-words';
 import { withRouter } from 'react-router'
+import ModalHuyNha from '../Modals/ModalHuyNha';
 
 class LichSuDangNha extends Component {
     constructor(props) {
@@ -12,7 +13,9 @@ class LichSuDangNha extends Component {
         this.state = {
             data: [],
             count: 0,
-            selectedRowKeys: []
+            selectedRowKeys: [],
+            isModalHuy: false,
+            tinhTrang: 3
         }
     }
 
@@ -29,16 +32,24 @@ class LichSuDangNha extends Component {
         }
     }
 
+    getDataDangNha = async(indexPage, sodong, tinhtrang) => {
+        let user = localStorage.getItem('user')
+        user = JSON.parse(user)
+
+        if (user && user.username) {
+            await this.layLichSuDangNha(user.username, indexPage, sodong, tinhtrang)
+        }
+    }
+
     layLichSuDangNha = async (taikhoan, indexPage, sodong, tinhtrang) => {
         let [err, result] = await to(fetchData.layLichSuDangNha(taikhoan, indexPage, sodong, tinhtrang))
 
-        console.log(result)
         if (err) {
             notification.open({ message: "Lỗi lấy lịch sử đăng nhà!!!", description: `${err}` })
             return
         }
 
-        this.setState({ data: result.nha, count: result.dem })
+        this.setState({ data: result.nha, count: result.dem, tinhTrang: tinhtrang })
     }
 
     onSelectChange = selectedRowKeys => {
@@ -106,8 +117,22 @@ class LichSuDangNha extends Component {
         this.setState({ searchText: '' });
     };
 
+    openModalHuy = (data) => {
+        let user = localStorage.getItem('user')
+        user = JSON.parse(user)
+
+        this.setState({isModalHuy: true})
+        if (user && user.username) this.ModalHuyRef.setData(data.idNha, data.dChi, user.username)
+    }
+
+    closeModalHuy = () => {
+        this.setState({isModalHuy: false})
+    }
+
+    onRefModalHuy = (ref) => this.ModalHuyRef = ref
+
     render() {
-        let { data, selectedRowKeys } = this.state
+        let { data, selectedRowKeys, isModalHuy, tinhTrang } = this.state
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
@@ -161,16 +186,46 @@ class LichSuDangNha extends Component {
                 key: "tinhTrangNha",
                 ...this.getColumnSearchProps('tinhTrangNha'),
             },
+            {
+                title: "Tình trạng",
+                dataIndex: "tTrang",
+                key: "tTrang",
+                render: (text, record) => (
+                    <span>
+                        {Number(text) === 0 ? "Đã xoá" : null}
+                        {Number(text) === 1 ? "Đã xác nhận" : null}
+                        {Number(text) === 2 ? "Chưa xác nhận" : null}
+                    </span>
+                ),
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                render: (text, record) => (
+                    <div>
+                        <Icon onClick={() => this.openModalHuy(record)} style={{color: "red", marginLeft: 5}} title={`Huỷ chủ nhà${record.tenCN}`} type="close" />
+                    </div>
+                )
+            }
         ];
 
         return (
-            <Table
-                pagination={true}
-                columns={columns} 
-                rowSelection={rowSelection} 
-                dataSource={data} 
-                size="middle" 
-            />
+            <>
+                <Table
+                    pagination={true}
+                    columns={columns} 
+                    rowSelection={rowSelection} 
+                    dataSource={data} 
+                    size="middle" 
+                />
+                <ModalHuyNha
+                    ref={this.onRefModalHuy}
+                    closeModalHuy={this.closeModalHuy}
+                    isModalHuy={isModalHuy}
+                    getAll={this.getDataDangNha}
+                    tinhTrang={tinhTrang}
+                />
+            </>
         )
     }
 }

@@ -20,7 +20,8 @@ export default class ListHome extends Component {
             isModalHuy: false,
             isModalXacNhan: false,
             permission: "",
-            isModalDangNha: false
+            isModalDangNha: false,
+            tinhTrang: 3
         }
 
         this.modalXemRef = React.createRef()
@@ -34,7 +35,15 @@ export default class ListHome extends Component {
         user = JSON.parse(user)
 
         if (user && user.username) await this.setState({permission: user.permission})
-        await this.layDanhSachNha(0, 10000, 3)
+        if (user) {
+            if (Number(user.permission) !== 3) {
+                await this.layDanhSachNha(0, 10000, 1)
+            } else {
+                await this.layDanhSachNha(0, 10000, 3)
+            }
+        }else {
+            await this.layDanhSachNha(0, 10000, 1)
+        }
     }
 
     layDanhSachNha = async (indexPage, sodong, tinhtrang) => {
@@ -45,7 +54,7 @@ export default class ListHome extends Component {
             return
         }
 
-        this.setState({ data: result.nha, count: result.dem })
+        this.setState({ data: result.nha, count: result.dem, tinhTrang: tinhtrang })
     }
 
     onSelectChange = selectedRowKeys => {
@@ -164,24 +173,17 @@ export default class ListHome extends Component {
             if (Number(user.permission) === 3) {
                 return (
                     <div style={{width: 62}}>
-                        <Icon onClick={() => this.openModalXem(record)} style={{color: "blue", marginRight: 5}} title={`Xem thông tin nhà ${record.dChi}`} type="eye" />
-                        <Icon onClick={() => this.openModalXacNhan(record)} style={{color: "blue", marginLeft: 5, marginRight: 5}} title={`Xác nhận chủ nhà${record.tenCN}`} type="check" />
-                        <Icon onClick={() => this.openModalHuy(record)} style={{color: "red", marginLeft: 5}} title={`Huỷ chủ nhà${record.tenCN}`} type="close" />
+                        <Icon onClick={() => this.openModalXacNhan(record)} style={{color: "blue", marginLeft: 5, marginRight: 5}} title={`Xác nhận chủ nhà ${record.tKhoanChuNha}`} type="check" />
+                        <Icon onClick={() => this.openModalHuy(record)} style={{color: "red", marginLeft: 5}} title={`Huỷ chủ nhà ${record.tKhoanChuNha}`} type="close" />
                     </div>
                 )
-            } else {
+            } else if (Number(user.permission) === 1) {
                 return (
                     <div>
                         <Icon onClick={() => this.openModalXem(record)} style={{color: "blue", marginRight: 5}} title={`Xem thông tin nhà ${record.dChi}`} type="eye" />
                     </div>
                 )
             }
-        }else {
-            return (
-                <div>
-                    <Icon onClick={() => this.openModalXem(record)} style={{color: "blue", marginRight: 5}} title={`Xem thông tin nhà ${record.dChi}`} type="eye" />
-                </div>
-            )
         }
     }
 
@@ -201,11 +203,25 @@ export default class ListHome extends Component {
     onRefModalDangNha = (ref) => this.ModalDangNhaRef = ref
 
     render() {
-        let { data, selectedRowKeys, isModalXem, isModalHuy, isModalXacNhan, permission, isModalDangNha } = this.state
+        let { data, selectedRowKeys, isModalXem, isModalHuy, isModalXacNhan, permission, isModalDangNha, tinhTrang } = this.state
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
+        let user = localStorage.getItem('user')
+        user = JSON.parse(user)
+
+        let actions = {}
+        if (user && user.permission) {
+            if (Number(user.permission) !== 2) {
+                actions = {
+                    title: 'Action',
+                    key: 'action',
+                    render: this.renderAction,
+                }
+            }
+        } 
+        
         const columns = [
             {
                 title: 'Địa chỉ',
@@ -267,17 +283,13 @@ export default class ListHome extends Component {
                     </span>
                 ),
             },
-            {
-                title: 'Action',
-                key: 'action',
-                render: this.renderAction,
-            }
+            actions
         ];
 
         return (
             <>
                 {
-                    Number(permission) === 2 || Number(permission) === 3 ? 
+                    Number(permission) === 2 ? 
                     <Button onClick={this.openModalDangNha} type="primary">
                         <Icon type="plus"></Icon>Đăng nhà
                     </Button> : null
@@ -305,12 +317,14 @@ export default class ListHome extends Component {
                     closeModalHuy={this.closeModalHuy}
                     isModalHuy={isModalHuy}
                     getAll={this.layDanhSachNha}
+                    tinhTrang={tinhTrang}
                 />
                 <ModalDangNha 
                     ref={this.onRefModalDangNha}
                     closeModalDangNha={this.closeModalDangNha}
                     isModalDangNha={isModalDangNha}
                     getAll={this.layDanhSachNha}
+                    tinhTrang={tinhTrang}
                 />
             </>
         )

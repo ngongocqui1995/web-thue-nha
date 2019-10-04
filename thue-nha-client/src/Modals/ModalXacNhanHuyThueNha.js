@@ -3,18 +3,19 @@ import { Modal, Button, notification } from 'antd';
 import fetchData from '../api/api'
 import to from 'await-to-js'
 
-export default class ModalHuyThueNha extends Component {
+export default class ModalXacNhanHuyThueNha extends Component {
     constructor(props){
         super(props)
 
         this.state = {
             id: "",
-            taiKhoan: ""
+            taiKhoan: "",
+            diaChi: ""
         }
     }
 
-    setData = (id, taiKhoan) => {
-        this.setState({id, taiKhoan})
+    setData = (id, diaChi, taiKhoan) => {
+        this.setState({id, diaChi, taiKhoan})
     }
 
     handleHuy = async() => {
@@ -30,7 +31,7 @@ export default class ModalHuyThueNha extends Component {
 
     render() {
         let { isModalHuy } = this.props
-        let { taiKhoan } = this.state
+        let { diaChi, taiKhoan } = this.state
 
         return (
             <Modal
@@ -48,7 +49,7 @@ export default class ModalHuyThueNha extends Component {
                   ]}
                   style={{textAlign: "center"}}
                 >
-                    {`Bạn chắc chắn muốn huỷ nhà được tài khoản ${taiKhoan} này thuê không?`}
+                    {`Bạn chắc chắn muốn huỷ thuê nhà ${diaChi} của ${taiKhoan} này thuê không?`}
             </Modal>
         )
     }

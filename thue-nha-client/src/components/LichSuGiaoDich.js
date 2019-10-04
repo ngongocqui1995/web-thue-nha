@@ -4,6 +4,7 @@ import to from 'await-to-js'
 import { notification, Table, Input, Button, Icon } from 'antd';
 import Highlighter from 'react-highlight-words';
 import { withRouter } from 'react-router'
+import ModalXacNhanHuyThueNha from '../Modals/ModalXacNhanHuyThueNha';
 
 class LichSuGiaoDich extends Component {
     constructor(props) {
@@ -12,7 +13,8 @@ class LichSuGiaoDich extends Component {
         this.state = {
             data: [],
             count: 0,
-            selectedRowKeys: []
+            selectedRowKeys: [],
+            isModalHuy: false
         }
     }
 
@@ -105,8 +107,22 @@ class LichSuGiaoDich extends Component {
         this.setState({ searchText: '' });
     };
 
+    openModalHuy = (data) => {
+        let user = localStorage.getItem('user')
+        user = JSON.parse(user)
+
+        this.setState({isModalHuy: true})
+        if (user && user.username) this.ModalHuyRef.setData(data.idNha, data.diaChi, user.username)
+    }
+
+    closeModalHuy = () => {
+        this.setState({isModalHuy: false})
+    }
+
+    onRefModalHuy = (ref) => this.ModalHuyRef = ref
+
     render() {
-        let { data, selectedRowKeys } = this.state
+        let { data, selectedRowKeys, isModalHuy } = this.state
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
@@ -141,17 +157,34 @@ class LichSuGiaoDich extends Component {
                 dataIndex: "tinhtrangThue",
                 key: "tinhtrangThue",
                 ...this.getColumnSearchProps('tinhtrangThue'),
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                render: (text, record) => (
+                    <div>
+                        <Icon onClick={() => this.openModalHuy(record)} style={{color: "red", marginLeft: 5}} title={`Huỷ chủ nhà${record.tenCN}`} type="close" />
+                    </div>
+                )
             }
         ];
 
         return (
-            <Table
-                pagination={true}
-                columns={columns} 
-                rowSelection={rowSelection} 
-                dataSource={data} 
-                size="middle" 
-            />
+            <>
+                <Table
+                    pagination={true}
+                    columns={columns} 
+                    rowSelection={rowSelection} 
+                    dataSource={data} 
+                    size="middle" 
+                />
+                <ModalXacNhanHuyThueNha
+                    ref={this.onRefModalHuy}
+                    closeModalHuy={this.closeModalHuy}
+                    isModalHuy={isModalHuy}
+                    getAll={this.layLichSuGiaoDich}
+                />
+            </>
         )
     }
 }
